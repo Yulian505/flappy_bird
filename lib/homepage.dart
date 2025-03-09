@@ -11,7 +11,7 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   //bird variables
-  static double birdY = 0;
+  static double birdY = 0; //Posicion del ave
   double initialPos = birdY;
   double height = 0;
   double time = 0;
