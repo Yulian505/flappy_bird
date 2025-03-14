@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MyBarrier extends StatelessWidget {
-  final barrierWidth; //out of 2, wheree 2 is the width of the screen
-  final barrierHeight; //proportion of the screenheight
+  final barrierWidth; 
+  final barrierHeight; 
   final barrierX;
   final bool isThisBottomBarrier;
 
@@ -25,4 +25,3 @@ class MyBarrier extends StatelessWidget {
     );
   }
 }
-

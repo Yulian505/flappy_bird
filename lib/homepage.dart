@@ -13,70 +13,126 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  //bird variables
-  static double birdY = 0; 
+  // Variables del ave
+  static double birdY = 0;
   double initialPos = birdY;
   double height = 0;
   double time = 0;
-  double gravity = -4.9; //how strong the gravity is
-  double velocity = 3.5; //how strong the jump is
-  double birdWeight = 0.1; //out of 2, 2 being the entire width of the screen
-  double birdHeight = 0.1; //out of 2, 2 being the entire height of the screen
+  double gravity = -0.05; // Gravedad 
+  double velocity = 0.1; // Velocidad de salto 
+  double birdWeight = 0.1;
+  double birdHeight = 0.1;
 
-  //game settings
+  // Variables del juego
   bool gameHasStarted = false;
+  int score = 0; // Puntaje actual
+  int highScore = 0; // Mejor puntaje
 
-  //barrier variables
+  // Variables de las barreras
   static List<double> barrierX = [2, 2 + 1.5];
-  static double barrierHeight = 0.5; //out of 2
+  static double barrierHeight = 0.5; // Altura de las barreras
   List<List<double>> barrierWeight = [
-    // out of 2, where 2 is the entire heigth of the screen
-    // [topHeight, bottomHeight]
-    [0.6, 0.4],
-    [0.4, 0.6]
+    [0.4, 0.4],
+    [0.4, 0.4]
   ];
 
+  // Velocidad de las barreras y fondo
+  double barrierSpeed = 0.02; 
+  double backgroundSpeed = 0.01; 
 
+  // Variable para controlar el movimiento del fondo
+  double backgroundOffset = 0;
+
+  // Reiniciar el juego
+  void resetGame() {
+    setState(() {
+      birdY = 0;
+      initialPos = birdY;
+      time = 0;
+      gameHasStarted = false;
+      score = 0; // Reiniciar el puntaje
+      barrierX = [2, 2 + 1.5]; // Restablecer la posición de las barreras
+      backgroundOffset = 0; // Restablecer la posición del fondo
+    });
+  }
+
+  // Inicia el juego
   void starGame() {
     gameHasStarted = true;
     Timer.periodic(Duration(milliseconds: 10), (timer) {
-      //a real physical jump is the same as an upside down parabola
-      //so this os a simple quadratic equation
+      // Movimiento del ave (caída por gravedad)
       height = gravity * time * time + velocity * time;
 
       setState(() {
         birdY = initialPos - height;
       });
 
-      //check if bird is dead
-      if (birdIsDead()) {
-        timer.cancel();
-        _showDialog();
+      // Mover las barreras
+      for (int i = 0; i < barrierX.length; i++) {
+        barrierX[i] -= barrierSpeed;
       }
 
-      //keep the time going
+      // Mover el fondo
+      backgroundOffset -= backgroundSpeed;
+
+      // Si el fondo se ha desplazado completamente, se reinicia
+      if (backgroundOffset <= -1) {
+        backgroundOffset = 0;
+      }
+
+      // Si las barreras se salen de la pantalla, se reinicia
+      for (int i = 0; i < barrierX.length; i++) {
+        if (barrierX[i] < -1) {
+          barrierX[i] = 2;
+          score++; // Sumar un punto cuando el ave pasa una barrera
+        }
+      }
+
+      // Verifica si el ave está muerto
+      if (birdIsDead()) {
+        // Actualizar el mejor puntaje
+        if (score > highScore) {
+          highScore = score;
+        }
+        timer.cancel();
+        _showDialog();  
+      }
+
+      // Mantener el tiempo en marcha
       time += 0.1;
     });
   }
 
+  // Método para hacer que el ave pueda saltar
   void jump() {
     setState(() {
       time = 0;
       initialPos = birdY;
     });
-
   }
 
-  void resetGame() {
-    Navigator.pop(context);
-    setState(() {
-      birdY = 0;
-      gameHasStarted = false;
-      time = 0;
-      initialPos = birdY;
-    });
+  // Verifica si el pájaro está muerto
+  bool birdIsDead() {
+    // Solo verificar si el ave está muerto después de que ha comenzado el juego
+    if (!gameHasStarted) return false;
+
+    if (birdY < -1 || birdY > 1) {
+      return true;
+    }
+
+    for (int i = 0; i < barrierX.length; i++) {
+      if (barrierX[i] <= birdWeight &&
+          barrierX[i] + barrierWeight[i][0] >= -birdWeight &&
+          (birdY <= -1 + barrierWeight[i][0] ||
+              birdY + birdHeight >= 1 - barrierWeight[i][1])) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
+  // Método que muestra el diálogo cuando el juego termina
   void _showDialog() {
     showDialog(
       context: context,
@@ -89,47 +145,34 @@ class _HomepageState extends State<Homepage> {
               style: TextStyle(color: Colors.white),
             ),
           ),
+          content: Text(
+            'Score: $score\nBest score: $highScore',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white),
+          ),
           actions: [
             GestureDetector(
-              onTap: resetGame,
+              onTap: () {
+                resetGame();  // Reiniciar el juego cuando el usuario toque "Play Again"
+                Navigator.pop(context); // Cierra el cuadro de diálogo
+              },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(5),
                 child: Container(
                   padding: EdgeInsets.all(7),
                   color: Colors.white,
                   child: Text(
-                 'P L A Y   A G A I N',
-                  style: TextStyle(color: Colors.brown),
+                    'P L A Y   A G A I N',
+                    style: TextStyle(color: Colors.brown),
                   ),
                 ),
-              )
-            )
+              ),
+            ),
           ],
         );
       },
     );
   }
-
-  bool birdIsDead() {
-    //check if bird is hitting the top of the bottom of the screen
-      if (birdY < -1 || birdY >1) {
-        return true;
-      }
-
-      //hits barriesrs
-      //check if bird is within x coordinates and y coordinates of the barriers
-
-      for (int i = 0; i < barrierX.length; i++) {
-        if (barrierX[i] <= birdWeight && 
-            barrierX[i] + barrierWeight[i][0] >= -birdWeight &&
-            (birdY <= -1 + barrierWeight[i][0] ||
-               birdY + birdHeight >= 1 - barrierWeight[i][1])) { 
-          return true;
-        }
-      }
-
-      return false;
-    }
 
   @override
   Widget build(BuildContext context) {
@@ -137,75 +180,79 @@ class _HomepageState extends State<Homepage> {
       onTap: gameHasStarted ? jump : starGame,
       child: Scaffold(
         body: Column(
-          children:[
+          children: [
             Expanded(
               flex: 3,
               child: Container(
-                color: Colors.blue,
+                color: Colors.blue, // Fondo azul
                 child: Center(
                   child: Stack(
-                    children:[
-                      //Bird
+                    children: [
+                      // Fondo en movimiento
+                      Positioned(
+                        left: backgroundOffset * MediaQuery.of(context).size.width,
+                        child: Container(
+                          color: Colors.blue,
+                          width: MediaQuery.of(context).size.width * 2, // Doble del ancho de la pantalla
+                          height: MediaQuery.of(context).size.height,
+                        ),
+                      ),
+
+                      // Movimiento del ave
                       MyBird(
                         birdY: birdY,
                         birdWidth: birdWeight,
                         birdHeight: birdHeight,
                       ),
-
-                      //tap to play
-                      MyCoverScreen(gameHasStarted: gameHasStarted),
-
-                      //top barrier 0
+                      
+                      // Barreras
                       MyBarrier(
                         barrierX: barrierX[0],
                         barrierHeight: barrierHeight,
                         barrierWidth: barrierWeight[0][0],
                         isThisBottomBarrier: false,
                       ),
-
-                      //bottom barrier 0
                       MyBarrier(
                         barrierX: barrierX[0],
                         barrierHeight: barrierHeight,
                         barrierWidth: barrierWeight[0][1],
                         isThisBottomBarrier: true,
                       ),
-
-                      //top barrier 1
                       MyBarrier(
                         barrierX: barrierX[1],
                         barrierHeight: barrierHeight,
                         barrierWidth: barrierWeight[1][0],
                         isThisBottomBarrier: false,
                       ),
-
-                      //bottom barrier 1
-
                       MyBarrier(
                         barrierX: barrierX[1],
                         barrierHeight: barrierHeight,
                         barrierWidth: barrierWeight[1][1],
                         isThisBottomBarrier: true,
                       ),
-
-                      Container(
-                        alignment: Alignment(0,-0.5),
-                        child: Text(
-                        gameHasStarted ? '' :'T A B  T O  P L A Y',
-                        style: TextStyle(fontSize: 20, color: Colors.white),),
-                      ),
-                ],
-                ),
-                ),
+                      
+                      // Pantalla de inicio o fin del juego
+                      MyCoverScreen(gameHasStarted: gameHasStarted),
+                    ],
+                  ),
                 ),
               ),
-              Expanded(
-                child: Container(
-                  color: Colors.brown,
+            ),
+            // Mostrar puntaje en la parte inferior
+            Expanded(
+              child: Container(
+                color: Colors.brown,
+                child: Center(
+                  child: Text(
+                    'Score: $score\nHigh Score: $highScore',
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              )
-          ]
-        )
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
