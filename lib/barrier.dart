@@ -15,12 +15,22 @@ class MyBarrier extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: Alignment((2 * barrierX + barrierWidth) / (2 - barrierWidth),
-        isThisBottomBarrier ? 1 : -1),
+      alignment: Alignment(
+        (2 * barrierX + barrierWidth) / (2 - barrierWidth),
+        isThisBottomBarrier ? 1 : -1,
+      ),
       child: Container(
-        color: Colors.green,
         width: MediaQuery.of(context).size.width * barrierWidth / 2,
         height: MediaQuery.of(context).size.height * 3 / 4 * barrierHeight / 2,
+        child: isThisBottomBarrier
+            ? Image.asset(
+                'lib/images/pipe_bottom.jpg',
+                fit: BoxFit.cover, // Ajusta la imagen para cubrir todo el contenedor
+              )
+            : Image.asset(
+                'lib/images/pipe_top.jpg',
+                fit: BoxFit.cover, // Ajusta la imagen para cubrir todo el contenedor
+              ),
       ),
     );
   }

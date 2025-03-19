@@ -16,9 +16,10 @@ class MyBird extends StatelessWidget {
     return Container(
       alignment: Alignment(0, (2 * birdY + birdHeight) / (2 - birdHeight)),
       child: Image.asset(
-        'lib/images/bird.png', 
+        'lib/images/bird.jpg', 
         width: MediaQuery.of(context).size.width * birdWidth, 
         height: MediaQuery.of(context).size.height * birdHeight, 
+        fit: BoxFit.fill, // Cambia a BoxFit.fill para asegurarte de que la imagen ocupe todo el espacio
       ),
     );
   }

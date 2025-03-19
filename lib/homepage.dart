@@ -20,8 +20,8 @@ class _HomepageState extends State<Homepage> {
   double time = 0;
   double gravity = -0.05; // Gravedad 
   double velocity = 0.1; // Velocidad de salto 
-  double birdWeight = 0.1;
-  double birdHeight = 0.1;
+  double birdWeight = 0.05;
+  double birdHeight = 0.05;
 
   // Variables del juego
   bool gameHasStarted = false;
@@ -175,85 +175,87 @@ class _HomepageState extends State<Homepage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: gameHasStarted ? jump : starGame,
-      child: Scaffold(
-        body: Column(
-          children: [
-            Expanded(
-              flex: 3,
-              child: Container(
-                color: Colors.blue, // Fondo azul
-                child: Center(
-                  child: Stack(
-                    children: [
-                      // Fondo en movimiento
-                      Positioned(
-                        left: backgroundOffset * MediaQuery.of(context).size.width,
-                        child: Container(
-                          color: Colors.blue,
-                          width: MediaQuery.of(context).size.width * 2, // Doble del ancho de la pantalla
-                          height: MediaQuery.of(context).size.height,
-                        ),
+Widget build(BuildContext context) {
+  return GestureDetector(
+    onTap: gameHasStarted ? jump : starGame,
+    child: Scaffold(
+      body: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('lib/images/background.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Center(
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: backgroundOffset * MediaQuery.of(context).size.width,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 2,
+                        height: MediaQuery.of(context).size.height,
                       ),
-
-                      // Movimiento del ave
-                      MyBird(
-                        birdY: birdY,
-                        birdWidth: birdWeight,
-                        birdHeight: birdHeight,
-                      ),
-                      
-                      // Barreras
-                      MyBarrier(
-                        barrierX: barrierX[0],
-                        barrierHeight: barrierHeight,
-                        barrierWidth: barrierWeight[0][0],
-                        isThisBottomBarrier: false,
-                      ),
-                      MyBarrier(
-                        barrierX: barrierX[0],
-                        barrierHeight: barrierHeight,
-                        barrierWidth: barrierWeight[0][1],
-                        isThisBottomBarrier: true,
-                      ),
-                      MyBarrier(
-                        barrierX: barrierX[1],
-                        barrierHeight: barrierHeight,
-                        barrierWidth: barrierWeight[1][0],
-                        isThisBottomBarrier: false,
-                      ),
-                      MyBarrier(
-                        barrierX: barrierX[1],
-                        barrierHeight: barrierHeight,
-                        barrierWidth: barrierWeight[1][1],
-                        isThisBottomBarrier: true,
-                      ),
-                      
-                      // Pantalla de inicio o fin del juego
-                      MyCoverScreen(gameHasStarted: gameHasStarted),
-                    ],
-                  ),
+                    ),
+                    MyBird(
+                      birdY: birdY,
+                      birdWidth: birdWeight,
+                      birdHeight: birdHeight,
+                    ),
+                    MyBarrier(
+                      barrierX: barrierX[0],
+                      barrierHeight: barrierHeight,
+                      barrierWidth: barrierWeight[0][0],
+                      isThisBottomBarrier: false,
+                    ),
+                    MyBarrier(
+                      barrierX: barrierX[0],
+                      barrierHeight: barrierHeight,
+                      barrierWidth: barrierWeight[0][1],
+                      isThisBottomBarrier: true,
+                    ),
+                    MyBarrier(
+                      barrierX: barrierX[1],
+                      barrierHeight: barrierHeight,
+                      barrierWidth: barrierWeight[1][0],
+                      isThisBottomBarrier: false,
+                    ),
+                    MyBarrier(
+                      barrierX: barrierX[1],
+                      barrierHeight: barrierHeight,
+                      barrierWidth: barrierWeight[1][1],
+                      isThisBottomBarrier: true,
+                    ),
+                    MyCoverScreen(gameHasStarted: gameHasStarted),
+                  ],
                 ),
               ),
             ),
-            // Mostrar puntaje en la parte inferior
-            Expanded(
-              child: Container(
-                color: Colors.brown,
-                child: Center(
-                  child: Text(
-                    'Score: $score\nHigh Score: $highScore',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                    textAlign: TextAlign.center,
-                  ),
+          ),
+          // Mostrar el suelo con la imagen de fondo y el puntaje
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('lib/images/ground.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  'Score: $score\nHigh Score: $highScore',
+                  style: TextStyle(color: Colors.black, fontSize: 20),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
